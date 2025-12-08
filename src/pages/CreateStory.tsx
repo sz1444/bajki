@@ -47,7 +47,6 @@ const CreateStory = () => {
         storyTone: "",
         requestDialogHumor: false,
         storyLesson: "",
-        storyLength: "medium", 
     });
     const [error, setError] = useState(""); 
 
@@ -287,7 +286,7 @@ const CreateStory = () => {
                 {currentStep === 3 && (
                     <div className="space-y-6 animate-fade-in">
                         <h2 className="text-xl font-bold text-foreground mb-6">
-                            Przesłanie i Długość
+                            Przesłanie
                         </h2>
 
                         <div className="space-y-2">
@@ -299,24 +298,6 @@ const CreateStory = () => {
                             className={`h-12 ${isFieldInvalid('storyLesson') ? 'border-red-500' : ''}`}
                             placeholder="np. Nauka cierpliwości i dzielenia się, nauka nowego słówka w języku angielskim"
                             />
-                        </div>
-
-                        <div className="space-y-3">
-                            <Label>Docelowa długość opowieści *</Label>
-                            <RadioGroup 
-                                value={formData.storyLength} 
-                                onValueChange={(value) => handleInputChange("storyLength", value)}
-                                className="space-y-3"
-                            >
-                                {["short", "medium", "long"].map((len) => (
-                                <div key={len} className={`flex items-center space-x-3 p-4 rounded-lg border transition-colors ${formData.storyLength === len ? 'border-accent ring-2 ring-accent/50' : 'border-border hover:border-accent/50'}`}>
-                                    <RadioGroupItem value={len} id={len} />
-                                    <Label htmlFor={len} className="cursor-pointer flex-1">
-                                    {len === "short" ? "Krótka (~5 min)" : len === "medium" ? "Średnia (~10 min)" : "Długa (~15 min)"}
-                                    </Label>
-                                </div>
-                                ))}
-                            </RadioGroup>
                         </div>
                     </div>
                 )}
