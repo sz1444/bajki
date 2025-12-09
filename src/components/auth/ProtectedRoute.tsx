@@ -1,5 +1,7 @@
-import { ReactNode, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+"use client";
+
+import { ReactNode, useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { AuthModal } from './AuthModal'
 import { Loader2 } from 'lucide-react'
@@ -15,6 +17,14 @@ export const ProtectedRoute = ({
 }: ProtectedRouteProps) => {
   const { user, loading } = useAuth()
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const router = useRouter()
+
+  // Handle redirect when not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/')
+    }
+  }, [loading, user, router])
 
   // Show loading state while checking authentication
   if (loading) {
@@ -28,19 +38,15 @@ export const ProtectedRoute = ({
     )
   }
 
-  // If not authenticated, show auth modal and redirect to home
+  // If not authenticated, show auth modal
   if (!user) {
-    return (
-      <>
-        <AuthModal isOpen={true} onClose={() => setShowAuthModal(false)} />
-        <Navigate to="/" replace />
-      </>
-    )
+    return <AuthModal isOpen={true} onClose={() => setShowAuthModal(false)} />
   }
 
   // TODO: Add subscription check when subscription system is implemented
   // if (requireSubscription && !hasActiveSubscription) {
-  //   return <Navigate to="/checkout" replace />
+  //   router.push('/checkout')
+  //   return null
   // }
 
   return <>{children}</>

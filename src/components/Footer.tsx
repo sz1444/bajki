@@ -1,3 +1,5 @@
+"use client";
+
 import { Headphones, Mail, Heart } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 

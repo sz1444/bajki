@@ -1,9 +1,13 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-illustration.png";
-import exampleAudio from "@/assets/example-audio.mp3"; // <<< ZAŁÓŻMY, ŻE TUTAJ IMPORTUJESZ SWÓJ MP3
-import { Play, Pause } from 'lucide-react'; // Importujemy ikony
+import { Play, Pause } from 'lucide-react';
+
+// Plik audio z folderu public/
+const exampleAudio = "/example-audio.mp3";
 
 const HeroSection = () => {
   // 1. STANY DO KONTROLI AUDIO
@@ -100,9 +104,9 @@ const HeroSection = () => {
           <div className="flex-1 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
             <div className="relative">
               <div className="absolute inset-0 rounded-3xl opacity-50" />
-              <img 
-                src={heroImage} 
-                alt="Dziecko słuchające bajki z przyjaznym smokiem" 
+              <img
+                src={typeof heroImage === 'string' ? heroImage : heroImage.src}
+                alt="Dziecko słuchające bajki z przyjaznym smokiem"
                 className="w-full max-w-lg mx-auto animate-float"
               />
             </div>

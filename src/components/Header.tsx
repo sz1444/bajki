@@ -1,3 +1,5 @@
+"use client";
+
 import { Headphones } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthButton } from "@/components/auth/AuthButton";

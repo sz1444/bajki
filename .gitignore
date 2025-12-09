@@ -35,3 +35,6 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# macOS
+.DS_Store
