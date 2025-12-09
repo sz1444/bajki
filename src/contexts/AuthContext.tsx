@@ -44,71 +44,33 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    console.log('AuthContext: useEffect initializing')
-
-    // Set a timeout to ensure loading is set to false after 2 seconds max
-    const timeoutId = setTimeout(() => {
-      console.log('AuthContext: Timeout reached, forcing loading = false')
-      setLoading(false)
-    }, 2000)
-
-    // Get initial session with timeout
-    console.log('AuthContext: Getting initial session')
-
-    const getSessionWithTimeout = Promise.race([
-      supabase.auth.getSession(),
-      
-    ])
-
-    getSessionWithTimeout
-      .then((result: any) => {
-        const { data: { session } } = result
-        console.log('AuthContext: Got session:', session ? 'exists' : 'null')
-        clearTimeout(timeoutId)
-        setSession(session)
-        setUser(session?.user ?? null)
-        if (session?.user) {
-          fetchProfile(session.user.id)
-        } else {
-          setLoading(false)
-        }
-      })
-      .catch((error) => {
-        console.error('AuthContext: Error getting session:', error)
-        console.warn('AuthContext: Session loading failed or timed out. Clearing localStorage.')
-
-        // Clear potentially corrupted localStorage
-        const keys = Object.keys(localStorage)
-        keys.forEach(key => {
-          if (key.startsWith('sb-') || key.includes('supabase')) {
-            localStorage.removeItem(key)
-          }
-        })
-
-        clearTimeout(timeoutId)
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      setUser(session?.user ?? null)
+      if (session?.user) {
+        fetchProfile(session.user.id)
+      } else {
         setLoading(false)
-      })
+      }
+    })
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('AuthContext: Auth state changed:', event, session ? 'has session' : 'no session')
-
       setSession(session)
-      setUser(session?.user)
+      setUser(session?.user ?? null)
 
       if (session?.user) {
         await fetchProfile(session.user.id)
       } else {
         setProfile(null)
+        setLoading(false)
       }
-
-      setLoading(false)
     })
 
     return () => {
-      clearTimeout(timeoutId)
       subscription.unsubscribe()
     }
   }, [])

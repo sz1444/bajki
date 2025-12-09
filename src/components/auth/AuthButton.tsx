@@ -92,10 +92,6 @@ export const AuthButton = () => {
           <User className="mr-2 h-4 w-4" />
           <span>Mój Panel</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/dashboard')}>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Ustawienia</span>
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
           <LogOut className="mr-2 h-4 w-4" />
