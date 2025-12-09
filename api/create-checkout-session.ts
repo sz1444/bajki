@@ -30,7 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const session = await stripe.checkout.sessions.create({
       customer_email: userEmail,
       client_reference_id: userId,
-      payment_method_types: ['card', 'blik', 'p24'],
+      payment_method_types: ['card'],
       line_items: [
         {
           price: priceId,
