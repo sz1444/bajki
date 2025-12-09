@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import CreateStory from "./pages/CreateStory";
 import Dashboard from "./pages/Dashboard";
+import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,8 +42,16 @@ const App = () => (
               }
             />
 
-            {/* TODO: Add these routes when pages are created */}
-            {/* <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} /> */}
+            {/* Checkout Routes */}
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedRoute>
+                  <Checkout />
+                </ProtectedRoute>
+              }
+            />
+            {/* TODO: Add success/cancel pages */}
             {/* <Route path="/checkout/success" element={<CheckoutSuccess />} /> */}
             {/* <Route path="/checkout/cancel" element={<CheckoutCancel />} /> */}
 

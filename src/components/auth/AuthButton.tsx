@@ -16,7 +16,7 @@ import { LogOut, User, Settings } from 'lucide-react'
 import { toast } from 'sonner'
 
 export const AuthButton = () => {
-  const { user, profile, signOut } = useAuth()
+  const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const [showAuthModal, setShowAuthModal] = useState(false)
 
@@ -53,10 +53,11 @@ export const AuthButton = () => {
   }
 
   const getInitials = () => {
-    if (profile?.full_name) {
-      return profile.full_name
+    const fullName = user.user_metadata?.full_name
+    if (fullName) {
+      return fullName
         .split(' ')
-        .map(n => n[0])
+        .map((n: string) => n[0])
         .join('')
         .toUpperCase()
         .slice(0, 2)
@@ -64,12 +65,16 @@ export const AuthButton = () => {
     return user.email?.[0].toUpperCase() || 'U'
   }
 
+  const getDisplayName = () => {
+    return user.user_metadata?.full_name || user.email?.split('@')[0] || 'Użytkownik'
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={profile?.avatar_url || user.user_metadata?.avatar_url} alt={profile?.full_name || user.email || ''} />
+            <AvatarImage src={user.user_metadata?.avatar_url} alt={getDisplayName()} />
             <AvatarFallback className="bg-primary text-primary-foreground">
               {getInitials()}
             </AvatarFallback>
@@ -80,7 +85,7 @@ export const AuthButton = () => {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {profile?.full_name || 'Użytkownik'}
+              {getDisplayName()}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}

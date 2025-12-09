@@ -33,35 +33,50 @@ export interface Story {
 }
 
 export const useStories = () => {
-  const { user } = useAuth()
+  const { user, session } = useAuth()
   const queryClient = useQueryClient()
 
   const { data: stories, isLoading, error, refetch } = useQuery({
-    queryKey: ['stories', user?.id],
+    queryKey: ['stories', user?.id, session?.access_token],
     queryFn: async () => {
-      if (!user) return []
+      if (!user || !session) {
+        return []
+      }
 
-      const { data, error } = await supabase
+      // Add timeout to prevent hanging queries
+      const queryPromise = supabase
         .from('stories')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
-      if (error) {
-        console.error('Error fetching stories:', error)
-        // If table doesn't exist yet (schema not run), return empty array gracefully
-        if (error.message?.includes('does not exist') || error.code === 'PGRST204' || error.code === '42P01') {
-          console.warn('Stories table does not exist yet. Please run the SQL schema.')
-          return []
-        }
-        return [] // Return empty array instead of throwing to prevent infinite loading
-      }
+      const timeoutPromise = new Promise<{ data: null; error: { message: string; code: string } }>((_, reject) => {
+        setTimeout(() => reject(new Error('Query timeout after 10 seconds')), 10000)
+      })
 
-      return data as Story[]
+      try {
+        const { data, error } = await Promise.race([queryPromise, timeoutPromise])
+
+        if (error) {
+          console.error('Error fetching stories:', error)
+          // If table doesn't exist yet (schema not run), return empty array gracefully
+          if (error.message?.includes('does not exist') || error.code === 'PGRST204' || error.code === '42P01') {
+            console.warn('Stories table does not exist yet. Please run the SQL schema.')
+            return []
+          }
+          return [] // Return empty array instead of throwing to prevent infinite loading
+        }
+
+        return data as Story[]
+      } catch (timeoutError) {
+        console.error('Query timeout:', timeoutError)
+        return [] // Return empty array on timeout
+      }
     },
-    enabled: !!user,
+    enabled: !!(user && session),
     staleTime: 2 * 60 * 1000, // 2 minutes
     retry: 1, // Only retry once to avoid long loading times
+    refetchOnMount: true, // Always refetch on mount to ensure fresh data
   })
 
   const deleteStoryMutation = useMutation({

@@ -1,6 +1,31 @@
 import { Headphones, Mail, Heart } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Footer = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+
+    // If not on homepage, navigate there first
+    if (location.pathname !== '/') {
+      navigate('/');
+      setTimeout(() => {
+        const element = document.getElementById(targetId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    } else {
+      // Already on homepage, just scroll
+      const element = document.getElementById(targetId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
+
   return (
     <footer id="footer" className="bg-primary text-primary-foreground py-12">
       <div className="container mx-auto px-6">
@@ -14,27 +39,48 @@ const Footer = () => {
               <span className="text-lg font-extrabold">Bajkownik</span>
             </div>
             <p className="text-primary-foreground/70 text-sm leading-relaxed">
-              Tworzymy magiczne chwile dla dzieci i rodziców poprzez 
+              Tworzymy magiczne chwile dla dzieci i rodziców poprzez
               personalizowane bajki audio.
             </p>
           </div>
-          
+
           {/* Links */}
           <div>
             <h4 className="font-bold mb-4">Nawigacja</h4>
             <ul className="space-y-2 text-sm text-primary-foreground/70">
               <li>
-                <a href="#jak-to-dziala" className="hover:text-primary-foreground transition-colors">
+                <a
+                  href="#jak-to-dziala"
+                  onClick={(e) => handleSmoothScroll(e, 'jak-to-dziala')}
+                  className="hover:text-primary-foreground transition-colors cursor-pointer"
+                >
                   Jak to działa
                 </a>
               </li>
               <li>
-                <a href="#faq" className="hover:text-primary-foreground transition-colors">
+                <a
+                  href="#subscription"
+                  onClick={(e) => handleSmoothScroll(e, 'subscription')}
+                  className="hover:text-primary-foreground transition-colors cursor-pointer"
+                >
+                  Cennik
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#faq"
+                  onClick={(e) => handleSmoothScroll(e, 'faq')}
+                  className="hover:text-primary-foreground transition-colors cursor-pointer"
+                >
                   FAQ
                 </a>
               </li>
               <li>
-                <a href="#kontakt" className="hover:text-primary-foreground transition-colors">
+                <a
+                  href="#footer"
+                  onClick={(e) => handleSmoothScroll(e, 'footer')}
+                  className="hover:text-primary-foreground transition-colors cursor-pointer"
+                >
                   Kontakt
                 </a>
               </li>

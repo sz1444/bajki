@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from '@tanstack/react-query'; // Import useMutation
 import { supabase } from '@/config/supabase'; // Załóż, że masz ten plik
 import { toast } from 'sonner'; // Do wyświetlania powiadomień
+import { useSubscription } from '@/lib/hooks/useSubscription';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,8 +39,26 @@ const storyToneOptions = [
 
 const CreateStory = () => {
     const navigate = useNavigate();
+    const { hasActiveSubscription, canCreateStory, subscription, isLoading: subscriptionLoading } = useSubscription();
     const [currentStep, setCurrentStep] = useState(1);
-    
+
+    // Check subscription access
+    useEffect(() => {
+        if (subscriptionLoading) return;
+
+        if (!hasActiveSubscription) {
+            toast.error('Musisz mieć aktywną subskrypcję aby tworzyć bajki');
+            navigate('/dashboard');
+            return;
+        }
+
+        if (!canCreateStory) {
+            toast.error(`Wykorzystałeś już limit bajek w tym miesiącu (${subscription?.stories_limit} bajek)`);
+            navigate('/dashboard');
+            return;
+        }
+    }, [hasActiveSubscription, canCreateStory, subscription, navigate, subscriptionLoading]);
+
     // Dodano "storyLength" (wymagane w walidacji, mimo braku pola w UI)
     const [formData, setFormData] = useState({
         childName: "",
@@ -71,7 +90,7 @@ const CreateStory = () => {
         if (!user) {
             throw new Error("Użytkownik nie jest zalogowany.");
         }
-        
+
         // Dane do wstawienia do tabeli 'stories'
         const storyData = {
             user_id: user.id,
@@ -100,6 +119,21 @@ const CreateStory = () => {
             throw error;
         }
 
+        // Increment stories_used_this_period counter for the subscription
+        if (subscription && subscription.stories_limit !== null) {
+            const { error: updateError } = await supabase
+                .from('subscriptions')
+                .update({
+                    stories_used_this_period: subscription.stories_used_this_period + 1
+                })
+                .eq('user_id', user.id);
+
+            if (updateError) {
+                console.error('Failed to update subscription counter:', updateError);
+                // Don't throw error here - story was created successfully
+            }
+        }
+
         return data;
     };
 
@@ -107,8 +141,12 @@ const CreateStory = () => {
     const mutation = useMutation({
         mutationFn: sendDataToSupabase,
         onSuccess: (data) => {
-            toast.success("Dane do bajki zapisane! Przekierowuję do wyboru planu.");
+            toast.success("Bajka została zapisana! Przekierowuję do panelu...");
             console.log("Zapisany obiekt:", data[0]);
+            // Redirect to dashboard after a short delay
+            setTimeout(() => {
+                navigate('/dashboard');
+            }, 1500);
         },
         onError: (error) => {
             console.error("Błąd podczas zapisywania danych w Supabase:", error);
@@ -418,10 +456,10 @@ const CreateStory = () => {
                         {mutation.isPending ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Zapisywanie...
+                                Tworzenie bajki...
                             </>
                         ) : (
-                            "Wybierz Plan Subskrypcji"
+                            "Stwórz Bajkę"
                         )}
                     </Button>
                     )}

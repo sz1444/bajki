@@ -2,18 +2,8 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/config/supabase'
 
-interface Profile {
-  id: string
-  email: string
-  full_name: string | null
-  avatar_url: string | null
-  created_at: string
-  updated_at: string
-}
-
 interface AuthContextType {
   user: User | null
-  profile: Profile | null
   session: Session | null
   loading: boolean
   signInWithGoogle: () => Promise<void>
@@ -39,64 +29,45 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null)
-  const [profile, setProfile] = useState<Profile | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Safety timeout - ensure loading is set to false after 5 seconds max
+    const timeoutId = setTimeout(() => {
+      console.warn('AuthContext: Session loading timeout - forcing loading = false')
+      setLoading(false)
+    }, 5000)
+
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchProfile(session.user.id)
-      } else {
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        clearTimeout(timeoutId)
+        setSession(session)
+        setUser(session?.user ?? null)
         setLoading(false)
-      }
-    })
+      })
+      .catch((error) => {
+        console.error('AuthContext: Error getting session:', error)
+        clearTimeout(timeoutId)
+        setSession(null)
+        setUser(null)
+        setLoading(false)
+      })
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
-
-      if (session?.user) {
-        await fetchProfile(session.user.id)
-      } else {
-        setProfile(null)
-        setLoading(false)
-      }
     })
 
     return () => {
+      clearTimeout(timeoutId)
       subscription.unsubscribe()
     }
   }, [])
-
-  const fetchProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
-
-      if (error) {
-        // Profile might not exist yet, that's okay
-        console.log('Profile fetch error:', error)
-        setProfile(null)
-      } else {
-        setProfile(data)
-      }
-    } catch (error) {
-      console.error('Error fetching profile:', error)
-      setProfile(null)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const signInWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -160,11 +131,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }
 
   const signOut = async () => {
-    console.log('AuthContext: signOut called')
-
     // Manually clear all Supabase auth keys from localStorage FIRST
     const keys = Object.keys(localStorage)
-    console.log('AuthContext: clearing localStorage keys:', keys.filter(k => k.startsWith('sb-')))
     keys.forEach(key => {
       if (key.startsWith('sb-') || key.includes('supabase.auth')) {
         localStorage.removeItem(key)
@@ -172,24 +140,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     })
 
     // Clear state immediately
-    console.log('AuthContext: clearing state')
     setUser(null)
-    setProfile(null)
     setSession(null)
 
     // Try to call Supabase signOut but don't wait for it (fire and forget)
     // It can hang sometimes, so we do it in the background
-    console.log('AuthContext: calling supabase.auth.signOut (background)')
     supabase.auth.signOut({ scope: 'local' }).catch(error => {
-      console.error('AuthContext: Error signing out from Supabase:', error)
+      console.error('Error signing out from Supabase:', error)
     })
-
-    console.log('AuthContext: signOut completed successfully')
   }
 
   const value = {
     user,
-    profile,
     session,
     loading,
     signInWithGoogle,

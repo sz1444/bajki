@@ -81,7 +81,7 @@ export const StoryCard = ({ story, onDelete }: StoryCardProps) => {
                 <AudioPlayer audioUrl={story.audio_url} />
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <Button
                   size="sm"
                   variant="outline"
@@ -93,19 +93,9 @@ export const StoryCard = ({ story, onDelete }: StoryCardProps) => {
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
-                  onClick={() => downloadFile(story.pdf_url, 'pdf')}
-                  className="w-full"
-                  disabled={!story.pdf_url}
-                >
-                  <FileText className="w-3 h-3 mr-1" />
-                  PDF
-                </Button>
-                <Button
-                  size="sm"
                   variant="ghost"
                   onClick={() => setShowDeleteDialog(true)}
-                  className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="w-full border border-red-100 text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="w-3 h-3" />
                 </Button>

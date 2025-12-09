@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
 import { pl } from 'date-fns/locale'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,7 +8,18 @@ import { CreditCard, Calendar, AlertCircle } from 'lucide-react'
 import { useSubscription } from '@/lib/hooks/useSubscription'
 
 export const SubscriptionCard = () => {
-  const { subscription, hasActiveSubscription, isLoading } = useSubscription()
+  const navigate = useNavigate()
+  const { subscription, hasActiveSubscription, storiesRemaining, isLoading } = useSubscription()
+
+  const handleChoosePlan = () => {
+    navigate('/')
+    setTimeout(() => {
+      const subscriptionSection = document.getElementById('subscription')
+      if (subscriptionSection) {
+        subscriptionSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 100)
+  }
 
   if (isLoading) {
     return (
@@ -34,8 +45,8 @@ export const SubscriptionCard = () => {
               <p className="text-muted-foreground mb-4">
                 Wybierz plan, aby zacząć tworzyć magiczne bajki dla swojego dziecka!
               </p>
-              <Button asChild variant="hero" size="lg">
-                <Link to="/checkout">Wybierz Plan Subskrypcji</Link>
+              <Button variant="hero" size="lg" onClick={handleChoosePlan}>
+                Wybierz Plan Subskrypcji
               </Button>
             </div>
           </div>
@@ -44,9 +55,22 @@ export const SubscriptionCard = () => {
     )
   }
 
-  const planName = subscription.plan_type === 'yearly' ? 'Roczny' : 'Miesięczny'
-  const planPrice = subscription.plan_type === 'yearly' ? '599 zł/rok' : '59,99 zł/miesiąc'
+  const getPlanDetails = () => {
+    switch (subscription.plan_type) {
+      case 'basic':
+        return { name: 'Basic', price: '19,99 zł/miesiąc' }
+      case 'premium':
+        return { name: 'Premium', price: '59,99 zł/miesiąc' }
+      case 'annual':
+        return { name: 'Roczny Premium', price: '49,99 zł/miesiąc (599 zł/rok)' }
+      default:
+        return { name: 'Premium', price: '59,99 zł/miesiąc' }
+    }
+  }
+
+  const { name: planName, price: planPrice } = getPlanDetails()
   const renewalDate = format(new Date(subscription.current_period_end), 'd MMMM yyyy', { locale: pl })
+  const isBasicPlan = subscription.plan_type === 'basic'
 
   return (
     <Card>
@@ -77,6 +101,14 @@ export const SubscriptionCard = () => {
               {renewalDate}
             </span>
           </div>
+
+          {isBasicPlan && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-900 font-medium">
+                Pozostałe bajki w tym miesiącu: <span className="font-bold">{storiesRemaining} / 4</span>
+              </p>
+            </div>
+          )}
 
           {subscription.cancel_at_period_end && (
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">

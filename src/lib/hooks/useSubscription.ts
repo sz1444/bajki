@@ -2,17 +2,19 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/config/supabase'
 
-interface Subscription {
+export interface Subscription {
   id: string
   user_id: string
-  stripe_customer_id: string
-  stripe_subscription_id: string
-  plan_type: 'monthly' | 'yearly'
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+  stripe_price_id: string
+  plan_type: 'basic' | 'premium' | 'annual'
   status: 'active' | 'canceled' | 'past_due' | 'incomplete' | 'trialing'
-  current_period_start: string
-  current_period_end: string
+  current_period_start: string | null
+  current_period_end: string | null
   cancel_at_period_end: boolean
-  canceled_at: string | null
+  stories_used_this_period: number
+  stories_limit: number | null // null = unlimited
   created_at: string
   updated_at: string
 }
@@ -52,12 +54,23 @@ export const useSubscription = () => {
   const hasActiveSubscription = Boolean(
     subscription &&
     subscription.status === 'active' &&
-    new Date(subscription.current_period_end) > new Date()
+    (subscription.current_period_end === null || new Date(subscription.current_period_end) > new Date())
   )
+
+  const canCreateStory = subscription
+    ? subscription.stories_limit === null ||
+      subscription.stories_used_this_period < subscription.stories_limit
+    : false
+
+  const storiesRemaining = subscription?.stories_limit
+    ? subscription.stories_limit - subscription.stories_used_this_period
+    : null // null = unlimited
 
   return {
     subscription,
     hasActiveSubscription,
+    canCreateStory,
+    storiesRemaining,
     isLoading,
     error,
     refetch,
