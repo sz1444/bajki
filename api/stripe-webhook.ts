@@ -64,18 +64,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // Get subscription details
         const subscriptionId = session.subscription as string
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-
-        const invoices = await stripe.invoices.list({
-          subscription: subscriptionId,
-          limit: 1
-        })
-
-        const lastInvoice = invoices.data[0]
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId, { expand: ['plan']})
 
         // Extract metadata
         const userId = session.client_reference_id || session.metadata?.userId
         const planType = session.metadata?.planType || 'premium'
+
+        const now = new Date() // data opłacenia
+        let periodEnd = new Date(now)
+
+        if (planType === 'basic') {
+          periodEnd.setMonth(periodEnd.getMonth() + 1) // +1 miesiąc
+        } else if (planType === 'premium') {
+          periodEnd.setFullYear(periodEnd.getFullYear() + 1) // +12 miesięcy
+        }
+
+        // do bazy w ISO string
+        const current_period_start = now.toISOString()
+        const current_period_end = periodEnd.toISOString()
+
+        if (!planType) {
+          console.error('planType is required')
+          break
+        }
 
         if (!userId) {
           console.error('No userId found in session')
@@ -99,12 +110,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               stripe_price_id: subscription.items.data[0].price.id,
               plan_type: planType,
               status: 'active',
-              current_period_start: new Date(
-                lastInvoice.period_start * 1000
-              ).toISOString(),
-              current_period_end: new Date(
-                lastInvoice.period_end * 1000
-              ).toISOString(),
+              current_period_start: current_period_start,
+              current_period_end: current_period_end,
               cancel_at_period_end: false,
               stories_used_this_period: 0,
               stories_limit: storiesLimit,
@@ -138,12 +145,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .from('subscriptions')
           .update({
             status: subscription.status,
-            current_period_start: new Date(
-              subscription.current_period_start * 1000
-            ).toISOString(),
-            current_period_end: new Date(
-              subscription.current_period_end * 1000
-            ).toISOString(),
             cancel_at_period_end: subscription.cancel_at_period_end,
           })
           .eq('stripe_subscription_id', subscription.id)
