@@ -2,7 +2,7 @@
 
 // Compatibility layer for react-router-dom -> Next.js navigation
 import NextLink from "next/link";
-import { useRouter as useNextRouter, usePathname, useSearchParams as useNextSearchParams } from "next/navigation";
+import { useRouter as useNextRouter, usePathname } from "next/navigation";
 import { ComponentProps, ReactNode } from "react";
 
 // Link component replacement
@@ -28,24 +28,36 @@ export function useNavigate() {
 
 // useLocation hook replacement
 export function useLocation() {
-  const pathname = usePathname();
-  const searchParams = useNextSearchParams();
+  // Używamy window.location zamiast Next.js hooków, aby uniknąć problemu z Suspense
+  if (typeof window !== "undefined") {
+    return {
+      pathname: window.location.pathname,
+      search: window.location.search,
+      hash: window.location.hash,
+      state: null,
+    };
+  }
 
   return {
-    pathname: pathname || "/",
-    search: searchParams ? `?${searchParams.toString()}` : "",
-    hash: typeof window !== "undefined" ? window.location.hash : "",
+    pathname: "/",
+    search: "",
+    hash: "",
     state: null,
   };
 }
 
 // useSearchParams hook replacement - wrappuje Next.js version w kompatybilne API
 export function useSearchParams() {
-  const nextSearchParams = useNextSearchParams();
+  // Używamy window.URLSearchParams zamiast Next.js hook aby uniknąć Suspense boundary
+  if (typeof window === "undefined") {
+    return [new URLSearchParams(), () => {}] as const;
+  }
+
+  const searchParams = new URLSearchParams(window.location.search);
 
   // Zwracamy tablicę [searchParams, setSearchParams] zgodnie z react-router-dom API
   // Uwaga: setSearchParams nie jest wspierane w Next.js App Router
-  return [nextSearchParams, () => {}] as const;
+  return [searchParams, () => {}] as const;
 }
 
 // Navigate component replacement
