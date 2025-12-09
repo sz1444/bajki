@@ -61,14 +61,10 @@ const Checkout = () => {
         throw new Error(session.error)
       }
 
-      // Redirect to Stripe Checkout
-      const result = await stripe.redirectToCheckout({
-        sessionId: session.sessionId,
-      })
+      toast.info('Przekierowujemy Cię na bezpieczną stronę płatności Stripe...', { duration: 3000 });
 
-      if (result.error) {
-        throw new Error(result.error.message)
-      }
+      window.location.href = session.url;
+
     } catch (error) {
       console.error('Error:', error)
       toast.error('Wystąpił błąd podczas przetwarzania płatności')
