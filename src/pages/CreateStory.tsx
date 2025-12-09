@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useMutation } from '@tanstack/react-query'; // Import useMutation
+import { supabase } from '@/config/supabase'; // Załóż, że masz ten plik
+import { toast } from 'sonner'; // Do wyświetlania powiadomień
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, User, Wand2, Sparkles, AlertTriangle } from "lucide-react";
+import { Check, User, Wand2, Sparkles, AlertTriangle, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -16,7 +19,7 @@ const steps = [
   { number: 3, title: "Morał & Długość", icon: Sparkles },
 ];
 
-// DODANE NOWE GATUNKI
+// Opcje (pozostawione bez zmian)
 const storyGenreOptions = [
     { value: "magiczny_realizm", label: "Magiczny realizm (Rzeczywistość + Czar)" },
     { value: "klasyczna_basn", label: "Klasyczna baśń (Królowie, Smoki, Las)" },
@@ -36,6 +39,8 @@ const storyToneOptions = [
 const CreateStory = () => {
     const navigate = useNavigate();
     const [currentStep, setCurrentStep] = useState(1);
+    
+    // Dodano "storyLength" (wymagane w walidacji, mimo braku pola w UI)
     const [formData, setFormData] = useState({
         childName: "",
         childAge: "",
@@ -47,6 +52,7 @@ const CreateStory = () => {
         storyTone: "",
         requestDialogHumor: false,
         storyLesson: "",
+        storyLength: "standard", // Dodane, aby walidacja w kroku 3 działała
     });
     const [error, setError] = useState(""); 
 
@@ -55,7 +61,64 @@ const CreateStory = () => {
         setError("");
     };
 
-    // Funkcja walidacji
+    // --- LOGIKA SUPABASE I MUTACJI ---
+    
+    // Funkcja do wysłania danych do Supabase
+    const sendDataToSupabase = async (payload) => {
+        // Musisz pobrać user_id z sesji Supabase
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            throw new Error("Użytkownik nie jest zalogowany.");
+        }
+        
+        // Dane do wstawienia do tabeli 'stories'
+        const storyData = {
+            user_id: user.id,
+            title: `Bajka dla ${payload.childName}`, // Wstępny tytuł
+            child_name: payload.childName,
+            child_age: parseInt(payload.childAge),
+            story_genre: payload.storyGenre,
+            story_tone: payload.storyTone,
+            story_lesson: payload.storyLesson,
+            current_emotional_challenge: payload.currentEmotionalChallenge || null,
+            favorite_food_place: payload.favoriteFoodPlace || null,
+            pet_mascot: payload.petMascot || null,
+            request_dialog_humor: payload.requestDialogHumor,
+            siblings_friends: payload.siblingsFriends || null,
+            form_data: payload, // Zapisujemy cały payload jako JSONB dla historii
+            status: 'generating', // Ustawiamy status jako 'generating'
+            story_text: 'Oczekuje na generację...', // Wstępny tekst
+        };
+
+        const { data, error } = await supabase
+            .from('stories')
+            .insert([storyData])
+            .select(); // Dodaj .select() by uzyskać wstawiony obiekt
+
+        if (error) {
+            throw error;
+        }
+
+        return data;
+    };
+
+    // Hook do obsługi wysyłania danych
+    const mutation = useMutation({
+        mutationFn: sendDataToSupabase,
+        onSuccess: (data) => {
+            toast.success("Dane do bajki zapisane! Przekierowuję do wyboru planu.");
+            console.log("Zapisany obiekt:", data[0]);
+        },
+        onError: (error) => {
+            console.error("Błąd podczas zapisywania danych w Supabase:", error);
+            setError(`Wystąpił błąd serwera: ${error.message}. Spróbuj ponownie.`);
+            toast.error("Wystąpił błąd serwera podczas zapisywania danych.");
+        },
+    });
+
+    // --- FUNKCJE WALIDACJI I NAWIGACJI ---
+    
     const validateStep = (step) => {
         let requiredFields = [];
         if (step === 1) {
@@ -63,18 +126,29 @@ const CreateStory = () => {
         } else if (step === 2) {
             requiredFields = ["storyGenre", "storyTone"];
         } else if (step === 3) {
-            requiredFields = ["storyLesson", "storyLength"];
+            // Uwaga: Pole storyLength nie istnieje w UI, ale jest wymagane w walidacji
+            requiredFields = ["storyLesson", "storyLength"]; 
         }
 
         const missingFields = requiredFields.filter(field => {
             const value = formData[field];
-            return typeof value === 'string' && value.trim() === "";
+            return (typeof value === 'string' || typeof value === 'number') && value.toString().trim() === "";
         });
 
         if (missingFields.length > 0) {
             setError("Proszę wypełnić wszystkie wymagane pola (*).");
             return false;
         }
+        
+        // Dodatkowa walidacja wieku
+        if (step === 1) {
+            const age = parseInt(formData.childAge);
+            if (isNaN(age) || age < 1 || age > 12) {
+                setError("Wiek musi być liczbą całkowitą w zakresie 1-12.");
+                return false;
+            }
+        }
+        
         setError("");
         return true;
     };
@@ -96,6 +170,13 @@ const CreateStory = () => {
           (currentStep === 3 && (field === "storyLesson" || field === "storyLength"));
           
         return isRequired && formData[field].toString().trim() === "" && error !== "";
+    };
+
+    const handleSubmit = () => {
+        if (validateStep(currentStep)) {
+            // Wysłanie danych przez mutację
+            mutation.mutate(formData);
+        }
     };
 
     return (
@@ -229,7 +310,7 @@ const CreateStory = () => {
                     </div>
                 )}
 
-                {/* Krok 2 (ZModyfikowany) */}
+                {/* Krok 2 */}
                 {currentStep === 2 && (
                     <div className="space-y-6 animate-fade-in">
                         <h2 className="text-xl font-bold text-foreground mb-6">
@@ -244,7 +325,6 @@ const CreateStory = () => {
                                 className={`w-full h-12 border rounded-lg px-3 ${isFieldInvalid('storyGenre') ? 'border-red-500' : 'border-border'}`}
                             >
                                 <option value="">Wybierz</option>
-                                {/* Użycie rozszerzonej listy */}
                                 {storyGenreOptions.map(option => (
                                     <option key={option.value} value={option.value}>
                                         {option.label}
@@ -299,6 +379,12 @@ const CreateStory = () => {
                             placeholder="np. Nauka cierpliwości i dzielenia się, nauka nowego słówka w języku angielskim"
                             />
                         </div>
+                        
+                        {/* UWAGA: Pole storyLength jest wymagane w walidacji, ale brakuje w UI. 
+                           Jeśli jest to stała wartość, można ją usunąć z walidacji 
+                           lub dodać tutaj pole RadioGroup/Select.
+                           Na potrzeby integracji, pozostawiam je w walidacji i stanie.
+                        */}
                     </div>
                 )}
 
@@ -307,29 +393,36 @@ const CreateStory = () => {
                     <Button 
                     variant="outline" 
                     onClick={prevStep}
-                    disabled={currentStep === 1}
+                    disabled={currentStep === 1 || mutation.isPending}
                     className="px-6"
                     >
                     Wstecz
                     </Button>
                     
                     {currentStep < 3 ? (
-                    <Button variant="hero" onClick={nextStep} className="px-8">
+                    <Button 
+                        variant="hero" 
+                        onClick={nextStep} 
+                        className="px-8"
+                        disabled={mutation.isPending}
+                    >
                         Dalej
                     </Button>
                     ) : (
-                    <Button 
-                        variant="hero" 
-                        onClick={() => {
-                            if (validateStep(currentStep)) {
-                                // Tutaj logika do wysłania danych i przekierowania do płatności
-                                console.log("Finalne dane do wysłania (z maskotką):", formData); 
-                                // navigate("/payment"); 
-                            }
-                        }}
+                    <Button
+                        variant="hero"
+                        onClick={handleSubmit}
+                        disabled={mutation.isPending} // Wyłącz przycisk podczas wysyłania
                         className="px-8"
                     >
-                        Stwórz Bajkę za 29,99 zł
+                        {mutation.isPending ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Zapisywanie...
+                            </>
+                        ) : (
+                            "Wybierz Plan Subskrypcji"
+                        )}
                     </Button>
                     )}
                 </div>
@@ -338,7 +431,6 @@ const CreateStory = () => {
             </div>
         </main>
         <Footer />
-
         </div>
     );
 };

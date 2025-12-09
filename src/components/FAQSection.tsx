@@ -11,16 +11,16 @@ const faqs = [
     answer: "Każda bajka, zanim trafi do klienta, przechodzi przez nasz autorski, wielostopniowy system kontroli jakości. Gwarantujemy, że wszystkie historie są w 100% pozytywne, edukacyjne oraz pozbawione przemocy, strachu i wszelkich nieodpowiednich elementów."
   },
   {
-    question: "Gwarancja Satysfakcji: Czy mogę zwrócić bajkę, jeśli maluchowi się nie spodoba?",
-    answer: "Tak! Jesteśmy pewni jakości naszych historii, dlatego oferujemy pełną **Gwarancję Satysfakcji**. Jeśli w ciągu 14 dni od zakupu bajka nie spełni oczekiwań Twojego dziecka, zwrócimy Ci 100% kwoty, bez konieczności podawania przyczyny."
+    question: "Czy mogę anulować subskrypcję w każdej chwili?",
+    answer: "Tak! Subskrypcję możesz anulować w dowolnym momencie, bez żadnych zobowiązań. Nie ma ukrytych opłat ani kar za rezygnację. Po anulowaniu zachowasz dostęp do wszystkich stworzonych bajek do końca opłaconego okresu rozliczeniowego."
   },
   {
     question: "Jak długo trwa tworzenie tak spersonalizowanej bajki Premium?",
     answer: "Ze względu na głęboką personalizację, precyzyjne dopasowanie tonu narracji oraz generowanie bajki o zwiększonej długości (do 10 minut), proces pisania i nagrywania zajmuje **maksymalnie 10 minut**. Gwarantujemy, że warto czekać na tak unikalny produkt."
   },
   {
-    question: "Czy mogę odsłuchać bajkę wielokrotnie i czy jest chroniona hasłem?",
-    answer: "Po zakupie bajka jest Twoją własnością na zawsze. Możesz ją odsłuchiwać nieograniczoną liczbę razy i pobrać na dowolne urządzenie. Plik jest standardowym audiobookiem MP3, bez konieczności użycia haseł czy specjalnych aplikacji."
+    question: "Ile bajek mogę stworzyć w ramach subskrypcji?",
+    answer: "W ramach subskrypcji możesz tworzyć **nielimitowaną** ilość bajek! Nie ma ograniczeń – twórz nowe historie tak często, jak chcesz. Wszystkie bajki możesz pobierać w formacie MP3 i PDF, odsłuchiwać wielokrotnie i zachować na swoich urządzeniach."
   },
   {
     question: "Co decyduje o jakości głosu lektora?",

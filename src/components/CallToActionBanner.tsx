@@ -25,8 +25,8 @@ const CallToActionBanner = () => {
                     </div>
                     <div className="flex flex-col items-center p-3">
                         <Shield className="w-8 h-8 text-accent mb-2" />
-                        <span className="text-sm font-semibold">14 Dni Zwrotu</span>
-                        <span className="text-xs text-muted-foreground">Pełna Gwarancja Satysfakcji</span>
+                        <span className="text-sm font-semibold">Anuluj Kiedy Chcesz</span>
+                        <span className="text-xs text-muted-foreground">Bez Zobowiązań</span>
                     </div>
                     <div className="flex flex-col items-center p-3">
                         <Heart className="w-8 h-8 text-accent mb-2" />
@@ -35,7 +35,7 @@ const CallToActionBanner = () => {
                     </div>
                 </div>
                 <Button variant="hero" size="xl" asChild>
-                    <Link to="/stworz-bajke">Stwórz Bajkę za 29,99 zł</Link>
+                    <a href="#subscription">Zobacz więcej</a>
                 </Button>
             </div>
         </div>

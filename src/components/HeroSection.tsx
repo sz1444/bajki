@@ -64,7 +64,7 @@ const HeroSection = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button variant="hero" size="xl" asChild>
-                <Link to="/stworz-bajke">Stwórz Bajkę za 29,99 zł</Link>
+                <a href="#subscription">Dowiedz się więcej</a>
               </Button>
               
               {/* ZMIENIONY PRZYCISK Z FUNKCJĄ I IKONĄ */}

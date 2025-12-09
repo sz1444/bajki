@@ -5,6 +5,7 @@ import BenefitsSection from "@/components/BenefitsSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import FAQSection from "@/components/FAQSection";
 import Footer from "@/components/Footer";
+import PricingSection from "@/components/PricingSection";
 import { Check } from "lucide-react";
 import { Button } from "react-day-picker";
 import CallToActionBanner from "@/components/CallToActionBanner";
@@ -16,10 +17,9 @@ const Index = () => {
       <main>
         <HeroSection />
         <HowItWorksSection />
-
-
-<CallToActionBanner />
+        <CallToActionBanner />
         <BenefitsSection />
+        <PricingSection />
         <TestimonialsSection />
         <FAQSection />
       </main>

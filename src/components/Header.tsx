@@ -1,4 +1,5 @@
 import { Headphones } from "lucide-react";
+import { AuthButton } from "@/components/auth/AuthButton";
 
 const Header = () => {
   return (
@@ -12,18 +13,22 @@ const Header = () => {
             Bajkownik
           </span>
         </div>
-        
-        <nav className="hidden md:flex items-center gap-8">
-          <a href="#jak-to-dziala" className="text-black/80 hover:text-black transition-colors font-medium">
-            Jak to działa
-          </a>
-          <a href="#faq" className="text-black/80 hover:text-black transition-colors font-medium">
-            FAQ
-          </a>
-          <a href="#footer" className="text-black/80 hover:text-black transition-colors font-medium">
-            Kontakt
-          </a>
-        </nav>
+
+        <div className="flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-8">
+            <a href="#jak-to-dziala" className="text-black/80 hover:text-black transition-colors font-medium">
+              Jak to działa
+            </a>
+            <a href="#faq" className="text-black/80 hover:text-black transition-colors font-medium">
+              FAQ
+            </a>
+            <a href="#footer" className="text-black/80 hover:text-black transition-colors font-medium">
+              Kontakt
+            </a>
+          </nav>
+
+          <AuthButton />
+        </div>
       </div>
     </header>
   );
