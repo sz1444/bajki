@@ -66,6 +66,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const subscriptionId = session.subscription as string
         const subscription = await stripe.subscriptions.retrieve(subscriptionId)
 
+        const invoices = await stripe.invoices.list({
+          subscription: subscriptionId,
+          limit: 1
+        })
+
+        const lastInvoice = invoices.data[0]
+
         // Extract metadata
         const userId = session.client_reference_id || session.metadata?.userId
         const planType = session.metadata?.planType || 'premium'
@@ -93,10 +100,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               plan_type: planType,
               status: 'active',
               current_period_start: new Date(
-                subscription.current_period_start * 1000
+                lastInvoice.period_start * 1000
               ).toISOString(),
               current_period_end: new Date(
-                subscription.current_period_end * 1000
+                lastInvoice.period_end * 1000
               ).toISOString(),
               cancel_at_period_end: false,
               stories_used_this_period: 0,
