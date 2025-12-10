@@ -39,7 +39,15 @@ const storyToneOptions = [
 
 const CreateStory = () => {
     const navigate = useNavigate();
-    const { hasActiveSubscription, canCreateStory, subscription, isLoading: subscriptionLoading } = useSubscription();
+    const {
+        hasActiveSubscription,
+        canCreateStory,
+        canCreateStoryDaily,
+        subscription,
+        dailyStoriesRemaining,
+        storiesRemaining,
+        isLoading: subscriptionLoading
+    } = useSubscription();
     const [currentStep, setCurrentStep] = useState(1);
 
     // Check subscription access
@@ -53,11 +61,16 @@ const CreateStory = () => {
         }
 
         if (!canCreateStory) {
-            toast.error(`Wykorzystałeś już limit bajek w tym miesiącu (${subscription?.stories_limit} bajek)`);
+            // Check which limit was exceeded
+            if (!canCreateStoryDaily) {
+                toast.error(`Wykorzystałeś dzienny limit bajek (${subscription?.daily_stories_limit}/4). Spróbuj jutro!`);
+            } else {
+                toast.error(`Wykorzystałeś miesięczny limit bajek (${subscription?.stories_limit} bajek)`);
+            }
             navigate('/dashboard');
             return;
         }
-    }, [hasActiveSubscription, canCreateStory, subscription, navigate, subscriptionLoading]);
+    }, [hasActiveSubscription, canCreateStory, canCreateStoryDaily, subscription, navigate, subscriptionLoading]);
 
     // Dodano "storyLength" (wymagane w walidacji, mimo braku pola w UI)
     const [formData, setFormData] = useState({
@@ -119,17 +132,24 @@ const CreateStory = () => {
             throw error;
         }
 
-        // Increment stories_used_this_period counter for the subscription
-        if (subscription && subscription.stories_limit !== null) {
+        // Increment counters for the subscription (both monthly and daily)
+        if (subscription) {
+            const updateData: any = {
+                stories_used_today: subscription.stories_used_today + 1, // Daily counter (all plans)
+            }
+
+            // Only increment monthly counter for basic plan (has monthly limit)
+            if (subscription.stories_limit !== null) {
+                updateData.stories_used_this_period = subscription.stories_used_this_period + 1
+            }
+
             const { error: updateError } = await supabase
                 .from('subscriptions')
-                .update({
-                    stories_used_this_period: subscription.stories_used_this_period + 1
-                })
+                .update(updateData)
                 .eq('user_id', user.id);
 
             if (updateError) {
-                console.error('Failed to update subscription counter:', updateError);
+                console.error('Failed to update subscription counters:', updateError);
                 // Don't throw error here - story was created successfully
             }
         }

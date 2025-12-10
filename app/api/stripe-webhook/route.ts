@@ -94,6 +94,10 @@ export async function POST(req: NextRequest) {
               cancel_at_period_end: false,
               stories_used_this_period: 0,
               stories_limit: storiesLimit,
+              // Daily limit fields (all plans have 4/day limit)
+              daily_stories_limit: 4,
+              stories_used_today: 0,
+              last_daily_reset_date: new Date().toISOString().split('T')[0],
             },
             {
               onConflict: 'user_id',

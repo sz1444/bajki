@@ -15,7 +15,14 @@ const Dashboard = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { stories, isLoading, deleteStory } = useStories()
-  const { hasActiveSubscription, canCreateStory, storiesRemaining, subscription } = useSubscription()
+  const {
+    hasActiveSubscription,
+    canCreateStory,
+    canCreateStoryDaily,
+    storiesRemaining,
+    dailyStoriesRemaining,
+    subscription
+  } = useSubscription()
 
   const getFirstName = () => {
     const fullName = user?.user_metadata?.full_name
@@ -39,7 +46,12 @@ const Dashboard = () => {
     }
 
     if (!canCreateStory) {
-      toast.error(`Wykorzystałeś już limit bajek w tym miesiącu (${subscription?.stories_limit} bajek). Przejdź na plan Premium dla nielimitowanego dostępu!`)
+      // Check which limit was exceeded
+      if (!canCreateStoryDaily) {
+        toast.error(`Wykorzystałeś dzienny limit bajek (${subscription?.daily_stories_limit}/dzień). Spróbuj jutro!`)
+      } else {
+        toast.error(`Wykorzystałeś miesięczny limit bajek (${subscription?.stories_limit} bajek). Przejdź na plan Premium dla nielimitowanego dostępu!`)
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
@@ -86,29 +98,36 @@ const Dashboard = () => {
               )}
             </div>
 
-            {hasActiveSubscription && canCreateStory ? (
-              <Button asChild variant="hero" size="lg" className="gap-2">
-                <Link to="/stworz-bajke">
-                  <Plus className="w-5 h-5" />
-                  Stwórz Nową Bajkę
-                </Link>
-              </Button>
-            ) : (
-              <Button
-                variant={hasActiveSubscription ? "outline" : "hero"}
-                size="lg"
-                className="gap-2"
-                onClick={handleCreateStoryClick}
-                disabled={hasActiveSubscription && !canCreateStory}
-              >
-                {!hasActiveSubscription ? (
-                  <Plus className="w-5 h-5" />
-                ) : (
-                  <Lock className="w-5 h-5" />
-                )}
-                {getButtonText()}
-              </Button>
-            )}
+            <div className="flex flex-col items-end gap-1">
+              {hasActiveSubscription && canCreateStory ? (
+                <Button asChild variant="hero" size="lg" className="gap-2">
+                  <Link to="/stworz-bajke">
+                    <Plus className="w-5 h-5" />
+                    Stwórz Nową Bajkę
+                  </Link>
+                </Button>
+              ) : (
+                <Button
+                  variant={hasActiveSubscription ? "outline" : "hero"}
+                  size="lg"
+                  className="gap-2"
+                  onClick={handleCreateStoryClick}
+                  disabled={hasActiveSubscription && !canCreateStory}
+                >
+                  {!hasActiveSubscription ? (
+                    <Plus className="w-5 h-5" />
+                  ) : (
+                    <Lock className="w-5 h-5" />
+                  )}
+                  {getButtonText()}
+                </Button>
+              )}
+              {hasActiveSubscription && subscription && (
+                <div className="text-xs text-gray-500 text-center w-full">
+                  Dzisiaj wygenerowano: {subscription.stories_used_today}/{subscription.daily_stories_limit} bajki
+                </div>
+              )}
+            </div>
           </div>
 
           {isLoading ? (

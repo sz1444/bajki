@@ -14,7 +14,10 @@ export interface Subscription {
   current_period_end: string | null
   cancel_at_period_end: boolean
   stories_used_this_period: number
-  stories_limit: number | null // null = unlimited
+  stories_limit: number | null // null = unlimited monthly
+  daily_stories_limit: number // Daily limit (default: 4 for all plans)
+  stories_used_today: number // Stories generated today
+  last_daily_reset_date: string // Date of last daily reset
   created_at: string
   updated_at: string
 }
@@ -44,6 +47,31 @@ export const useSubscription = () => {
         return null // Return null instead of throwing to prevent infinite loading
       }
 
+      if (!data) return null
+
+      // Check if we need to reset the daily counter
+      const today = new Date().toISOString().split('T')[0]
+      const lastReset = data.last_daily_reset_date
+
+      if (lastReset !== today) {
+        // Reset daily counter because it's a new day
+        const { error: resetError } = await supabase
+          .from('subscriptions')
+          .update({
+            stories_used_today: 0,
+            last_daily_reset_date: today
+          })
+          .eq('user_id', user.id)
+
+        if (resetError) {
+          console.error('Error resetting daily counter:', resetError)
+        } else {
+          // Update local data to reflect the reset
+          data.stories_used_today = 0
+          data.last_daily_reset_date = today
+        }
+      }
+
       return data as Subscription | null
     },
     enabled: !!user,
@@ -57,20 +85,37 @@ export const useSubscription = () => {
     (subscription.current_period_end === null || new Date(subscription.current_period_end) > new Date())
   )
 
-  const canCreateStory = subscription
+  // Monthly limit check (for basic plan)
+  const canCreateStoryMonthly = subscription
     ? subscription.stories_limit === null ||
       subscription.stories_used_this_period < subscription.stories_limit
     : false
 
+  // Daily limit check (for all plans)
+  const canCreateStoryDaily = subscription
+    ? subscription.stories_used_today < subscription.daily_stories_limit
+    : false
+
+  // Combined check: must pass both monthly AND daily limits
+  const canCreateStory = canCreateStoryMonthly && canCreateStoryDaily
+
+  // Monthly remaining (for basic plan)
   const storiesRemaining = subscription?.stories_limit
     ? subscription.stories_limit - subscription.stories_used_this_period
     : null // null = unlimited
 
+  // Daily remaining (for all plans)
+  const dailyStoriesRemaining = subscription
+    ? subscription.daily_stories_limit - subscription.stories_used_today
+    : 0
+
   return {
     subscription,
     hasActiveSubscription,
-    canCreateStory,
-    storiesRemaining,
+    canCreateStory, // Combined check (monthly AND daily)
+    canCreateStoryDaily, // Daily check only
+    storiesRemaining, // Monthly remaining
+    dailyStoriesRemaining, // Daily remaining
     isLoading,
     error,
     refetch,
