@@ -88,7 +88,7 @@ const HeroSection = () => {
             </div>
             
             {/* Trust badges */}
-            <div className="mt-10 flex items-center gap-6 justify-center lg:justify-start text-sm text-muted-foreground">
+            <div className="mt-10 flex flex-wrap items-center gap-6 justify-center lg:justify-start text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full" />
                 Bezpieczne dla dzieci

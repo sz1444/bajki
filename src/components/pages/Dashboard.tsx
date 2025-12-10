@@ -76,7 +76,7 @@ const Dashboard = () => {
 
         {/* Stories Section */}
         <div>
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
             <div>
               <h2 className="text-3xl font-bold mb-1">Twoje Bajki</h2>
               {stories.length > 0 && (

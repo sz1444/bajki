@@ -6,7 +6,7 @@ const CallToActionBanner = () => {
     
     return (
         <div className="text-center">
-            <div className="bg-white p-8 md:py-20 transition-all">
+            <div className="bg-white px-8 py-16 md:py-20 transition-all">
                 
                 <h3 className="text-3xl md:text-4xl font-extrabold text-foreground mb-4">
                     Niech Magia Zacznie Się Już Dziś!

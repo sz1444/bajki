@@ -38,7 +38,7 @@ export const SubscriptionCard = () => {
     return (
       <Card className="border-orange-200 bg-orange-50">
         <CardContent className="p-6">
-          <div className="flex items-start gap-4">
+          <div className="flex md:items-start md:flex-row gap-4 flex-col justify-center items-center">
             <AlertCircle className="w-6 h-6 text-orange-600 flex-shrink-0 mt-1" />
             <div className="flex-1">
               <h3 className="text-xl font-bold mb-2">Brak aktywnej subskrypcji</h3>

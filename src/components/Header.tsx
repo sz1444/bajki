@@ -39,7 +39,7 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white py-4 px-6 sticky top-0 z-50 shadow-sm">
+    <header className="bg-white py-4 sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto flex items-center justify-between">
         <a href="/" onClick={handleLogoClick} className="flex items-center gap-2 cursor-pointer">
           <div className="bg-primary-foreground/20 p-2 rounded-full">

@@ -26,8 +26,8 @@ const PricingSection = () => {
   return (
     <>
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
-    <section id="subscription" className="py-20 px-4 sm:px-6 lg:px-8 bg-background">
-      <div className="container mx-auto max-w-7xl">
+    <section id="subscription" className="py-20 lg:px-8 bg-background">
+      <div className="container mx-auto px-4">
 
         {/* Nagłówek Sekcji */}
         <div className="text-center mb-16">
