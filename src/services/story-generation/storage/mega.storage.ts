@@ -59,7 +59,7 @@ export class MegaStorageService implements IStorageService {
   async uploadAudio(
     audioBuffer: Buffer,
     filename: string,
-    metadata?: Record<string, any>
+    _metadata?: Record<string, any>
   ): Promise<string> {
     console.log('[Mega] Starting upload:', filename, 'Size:', audioBuffer.length, 'bytes')
 
@@ -71,7 +71,6 @@ export class MegaStorageService implements IStorageService {
       const uploadStream = storage.upload({
         name: filename,
         size: audioBuffer.length,
-        attributes: metadata || {},
       }, audioBuffer, folder)
 
       // Wait for upload to complete
@@ -79,8 +78,8 @@ export class MegaStorageService implements IStorageService {
 
       console.log('[Mega] Upload completed:', filename)
 
-      // Generate public link
-      const link = await file.link()
+      // Generate public link (noKey = false for full link with decryption key)
+      const link = await file.link(false)
       console.log('[Mega] Public link generated:', link)
 
       return link

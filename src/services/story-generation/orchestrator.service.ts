@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { GeminiService, StoryFormData } from './gemini.service'
 import { TextToSpeechService } from './text-to-speech.service'
 import { getStorageService } from './storage.service'
@@ -22,7 +22,7 @@ interface Story {
 }
 
 export class StoryGenerationOrchestrator {
-  private supabase: ReturnType<typeof createClient>
+  private supabase: SupabaseClient<any>
   private geminiService: GeminiService
   private ttsService: TextToSpeechService
   private emailService: EmailService
@@ -139,7 +139,7 @@ export class StoryGenerationOrchestrator {
       .from('stories')
       .select('*')
       .eq('id', storyId)
-      .single()
+      .single<Story>()
 
     if (error || !data) {
       throw new Error(`Story not found: ${storyId}`)
@@ -149,7 +149,7 @@ export class StoryGenerationOrchestrator {
       throw new Error(`Story is not in generating status: ${data.status}`)
     }
 
-    return data as Story
+    return data
   }
 
   /**
