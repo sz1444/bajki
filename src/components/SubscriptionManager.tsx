@@ -54,12 +54,6 @@ export default function SubscriptionManager({ subscription, onUpdate }: Subscrip
         throw new Error(data.error || 'Failed to manage subscription');
       }
 
-      // If getting portal link, redirect to it
-      if (action === 'get_portal_link' && data.url) {
-        window.location.href = data.url;
-        return;
-      }
-
       // Call onUpdate callback to refresh subscription data
       if (onUpdate) {
         onUpdate();
@@ -124,15 +118,6 @@ export default function SubscriptionManager({ subscription, onUpdate }: Subscrip
         )}
 
         <div className="flex flex-col sm:flex-row gap-3">
-          {/* Stripe Customer Portal - najlepsza opcja */}
-          <Button
-            onClick={() => handleManageSubscription('get_portal_link')}
-            disabled={loading}
-            variant="default"
-          >
-            {loading ? 'Ładowanie...' : 'Zarządzaj subskrypcją'}
-          </Button>
-
           {/* Anuluj lub wznów subskrypcję */}
           {isActive && !isCanceling && (
             <AlertDialog>

@@ -74,17 +74,18 @@ export async function POST(request: NextRequest) {
           }
         )
 
-        // Update database
+        // Webhook automatycznie zaktualizuje bazę, ale robimy to też tutaj dla pewności
         await supabase
           .from('subscriptions')
           .update({
             cancel_at_period_end: true,
+            updated_at: new Date().toISOString(),
           })
           .eq('stripe_subscription_id', stripeSubscriptionId)
 
         return NextResponse.json({
           success: true,
-          message: 'Subscription will be canceled at the end of the billing period',
+          message: 'Subskrypcja zostanie anulowana na koniec okresu rozliczeniowego',
           subscription: updatedSubscription,
         })
       }
@@ -98,70 +99,25 @@ export async function POST(request: NextRequest) {
           }
         )
 
-        // Update database
+        // Webhook automatycznie zaktualizuje bazę, ale robimy to też tutaj dla pewności
         await supabase
           .from('subscriptions')
           .update({
             cancel_at_period_end: false,
+            updated_at: new Date().toISOString(),
           })
           .eq('stripe_subscription_id', stripeSubscriptionId)
 
         return NextResponse.json({
           success: true,
-          message: 'Subscription resumed successfully',
+          message: 'Subskrypcja została wznowiona pomyślnie',
           subscription: updatedSubscription,
-        })
-      }
-
-      case 'cancel_immediately': {
-        // Cancel subscription immediately
-        const canceledSubscription = await stripe.subscriptions.cancel(
-          stripeSubscriptionId
-        )
-
-        // Update database
-        await supabase
-          .from('subscriptions')
-          .update({
-            status: 'canceled',
-            cancel_at_period_end: false,
-          })
-          .eq('stripe_subscription_id', stripeSubscriptionId)
-
-        return NextResponse.json({
-          success: true,
-          message: 'Subscription canceled immediately',
-          subscription: canceledSubscription,
-        })
-      }
-
-      case 'get_portal_link': {
-        // Create Stripe Customer Portal session
-        const stripeCustomerId = subscription.stripe_customer_id
-
-        if (!stripeCustomerId) {
-          return NextResponse.json(
-            { error: 'No Stripe customer ID found' },
-            { status: 400 }
-          )
-        }
-
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-
-        const portalSession = await stripe.billingPortal.sessions.create({
-          customer: stripeCustomerId,
-          return_url: `${baseUrl}/dashboard`,
-        })
-
-        return NextResponse.json({
-          success: true,
-          url: portalSession.url,
         })
       }
 
       default:
         return NextResponse.json(
-          { error: 'Invalid action' },
+          { error: 'Invalid action. Supported: cancel, resume' },
           { status: 400 }
         )
     }
