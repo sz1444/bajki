@@ -119,7 +119,7 @@ export const SubscriptionCard = () => {
           )}
 
           <Button variant="outline" className="w-full" asChild>
-            <Link to="/manage-subscription">Zarządzaj subskrypcją</Link>
+            <Link to="/dashboard/manage-subscription">Zarządzaj subskrypcją</Link>
           </Button>
         </div>
       </CardContent>

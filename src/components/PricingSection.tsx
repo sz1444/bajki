@@ -85,6 +85,12 @@ const PricingSection = () => {
                 <li className="flex items-start gap-3">
                   <Check className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" strokeWidth={2.5} />
                   <span className="text-foreground">
+                    <strong>dostęp do historii, zapisanych bajek</strong>
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" strokeWidth={2.5} />
+                  <span className="text-foreground">
                     Anulowanie <strong>w dowolnym momencie</strong>
                   </span>
                 </li>
@@ -138,6 +144,12 @@ const PricingSection = () => {
                   <Check className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" strokeWidth={2.5} />
                   <span className="text-foreground">
                     <strong>Premium Lektor</strong> – głos lektora najwyższej jakości
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" strokeWidth={2.5} />
+                  <span className="text-foreground">
+                    <strong>dostęp do historii, zapisanych bajek</strong>
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
@@ -211,6 +223,12 @@ const PricingSection = () => {
                   <Check className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" strokeWidth={2.5} />
                   <span className="text-foreground">
                     <strong>Premium Lektor</strong> – głos lektora najwyższej jakości
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" strokeWidth={2.5} />
+                  <span className="text-foreground">
+                    <strong>dostęp do historii, zapisanych bajek</strong>
                   </span>
                 </li>
                 <li className="flex items-start gap-3">

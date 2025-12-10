@@ -28,7 +28,7 @@ const faqs = [
   },
   {
     question: "W jaki sposób mogę zapłacić?",
-    answer: "Akceptujemy wszystkie popularne i bezpieczne metody płatności: karty kredytowe/debetowe, płatności mobilne, BLIK oraz przelewy online. Wszystkie transakcje są szyfrowane, aby zapewnić najwyższe bezpieczeństwo Twoich danych."
+    answer: "Akceptujemy wyłącznie bezpieczne i popularne metody płatności kartami kredytowymi i debetowymi (Visa, Mastercard, etc.). Dzięki temu możemy zagwarantować ciągłość Twojej subskrypcji i wygodne, automatyczne odnowienia."
   }
 ];
 

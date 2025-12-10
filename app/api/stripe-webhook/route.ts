@@ -111,27 +111,38 @@ export async function POST(req: NextRequest) {
 
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription
+        const subAny = subscription as any
 
-        // Get userId from metadata
-        const userId = subscription.metadata?.userId
-        if (!userId) {
-          console.error('No userId found in subscription metadata')
-          break
+        console.log('Updating subscription:', subscription.id, {
+          status: subscription.status,
+          cancel_at_period_end: subscription.cancel_at_period_end,
+          cancel_at: subAny.cancel_at,
+        });
+
+        // Update subscription in database - szukamy po stripe_subscription_id (nie metadata!)
+        const updateData: any = {
+          status: subscription.status,
+          cancel_at_period_end: subscription.cancel_at_period_end,
+          updated_at: new Date().toISOString(),
         }
 
-        // Update subscription in database
+        // Add period dates if available
+        if (subAny.current_period_start) {
+          updateData.current_period_start = new Date(subAny.current_period_start * 1000).toISOString()
+        }
+        if (subAny.current_period_end) {
+          updateData.current_period_end = new Date(subAny.current_period_end * 1000).toISOString()
+        }
+
         const { error } = await supabase
           .from('subscriptions')
-          .update({
-            status: subscription.status,
-            cancel_at_period_end: subscription.cancel_at_period_end,
-          })
+          .update(updateData)
           .eq('stripe_subscription_id', subscription.id)
 
         if (error) {
           console.error('Error updating subscription:', error)
         } else {
-          console.log('Subscription updated:', subscription.id)
+          console.log('Subscription updated successfully:', subscription.id)
         }
         break
       }
