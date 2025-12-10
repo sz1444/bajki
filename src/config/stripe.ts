@@ -39,7 +39,7 @@ export const planDetails: Record<PlanType, {
     features: [
       'Nielimitowane bajki 10-minutowe',
       'Pełna personalizacja',
-      'Generowanie wersji Audio MP3',
+      'Wersji Audio MP3',
       'Premium Lektor',
       'Anulowanie w dowolnym momencie'
     ]
@@ -52,7 +52,7 @@ export const planDetails: Record<PlanType, {
     features: [
       'Nielimitowane bajki 10-minutowe',
       'Pełna personalizacja',
-      'Generowanie wersji Audio MP3',
+      'Wersji Audio MP3',
       'Premium Lektor',
       'Anulowanie w dowolnym momencie',
       'Najlepsza cena - oszczędzasz 120 PLN'

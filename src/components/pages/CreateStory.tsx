@@ -154,6 +154,30 @@ const CreateStory = () => {
             }
         }
 
+        // Trigger story generation in background
+        const storyId = data[0].id;
+
+        try {
+            console.log('Triggering story generation for:', storyId);
+
+            const response = await fetch('/api/generate-story', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ storyId }),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Failed to trigger story generation:', errorText);
+                // Don't throw - story already created, generation can be retried manually
+            } else {
+                console.log('Story generation started successfully');
+            }
+        } catch (err) {
+            console.error('Error calling generate-story API:', err);
+            // Don't throw - story already created
+        }
+
         return data;
     };
 
