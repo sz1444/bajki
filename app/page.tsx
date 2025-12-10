@@ -1,4 +1,3 @@
-// Server Component - renderowany po stronie serwera dla lepszego SEO
 import HeroSection from "@/components/HeroSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import BenefitsSection from "@/components/BenefitsSection";

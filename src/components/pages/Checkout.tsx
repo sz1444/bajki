@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams } from 'next/navigation';
+import { useNavigate } from 'react-router-dom'
 import { loadStripe } from '@stripe/stripe-js'
 import { stripeConfig, planDetails, PlanType } from '@/config/stripe'
 import { useAuth } from '@/contexts/AuthContext'
@@ -13,12 +14,12 @@ import { toast } from 'sonner'
 const stripePromise = loadStripe(stripeConfig.publicKey)
 
 const Checkout = () => {
-  const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const params = useSearchParams();
+  const planType = params.get('plan');
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
 
-  const planType = (searchParams.get('plan') || 'premium') as PlanType
   const plan = planDetails[planType]
 
   useEffect(() => {
@@ -41,7 +42,6 @@ const Checkout = () => {
         throw new Error('Stripe nie załadował się poprawnie')
       }
 
-      // Call your backend to create a checkout session
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
